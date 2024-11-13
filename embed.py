@@ -9,7 +9,8 @@
 # Property - titleNumber
 from py2neo import Graph
 import random
-
+import pandas as pd
+from pandas import json_normalize
 
 # Connect to the graph database (replace with your connection details)
 # graph = Graph("bolt://localhost:7687", auth=("neo4j", "password"))
@@ -77,6 +78,31 @@ def create_groups(dicts, group_sizes):
         index += size  # Move the index forward by 'size' for the next group
 
     return grouped_dicts
+
+def create_pseudo_node(node_type, dicts, required_fields, optional_fields):
+    pseudo_node = {"labels": node_type}
+    dicts_df = json_normalize(dicts, sep='_')
+    type_dicts_df = dicts_df[dicts_df['labels'] == node_type] # change the key as per the query
+
+    for required_field in required_fields:
+        req_fields_list = type_dicts_df[type_dicts_df[required_field].notna()][required_field].unique().tolist()
+        req_field_val = random.choice(req_fields_list)
+        pseudo_node[required_field] = req_field_val
+
+    # search for all distinct values of the required fields and choose one for the pseudo-node
+
+    # randomly decide on which optional fields to choose, search for all distinct values for each of the optional fields and then choose one
+    opt_fields_num = random.randint(1, len(optional_fields))
+
+    # Randomly choose the selected number of elements from the list (without duplicates)
+    random_opt_fields = random.sample(optional_fields, opt_fields_num)
+
+    for optional_field in random_opt_fields:
+        opt_fields_list = type_dicts_df[type_dicts_df[optional_field].notna()][optional_field].unique().tolist()
+        opt_field_val = random.choice(opt_fields_list)
+        pseudo_node[optional_field] = opt_field_val
+
+    return pseudo_node
 
 
 dicts = [

@@ -79,10 +79,11 @@ def create_groups(dicts, group_sizes):
 
     return grouped_dicts
 
-def create_pseudo_node(node_type, dicts, required_fields, optional_fields):
-    pseudo_node = {"labels": node_type}
-    dicts_df = json_normalize(dicts, sep='_')
-    type_dicts_df = dicts_df[dicts_df['labels'] == node_type] # change the key as per the query
+def create_pseudo_node(node_type, type_dicts_df, required_fields, optional_fields):
+    pseudo_node = {}
+    # pseudo_node = {"labels": node_type}
+    # dicts_df = json_normalize(dicts, sep='_')
+    # type_dicts_df = dicts_df[dicts_df['labels'] == node_type] # change the key as per the query
 
     for required_field in required_fields:
         req_fields_list = type_dicts_df[type_dicts_df[required_field].notna()][required_field].unique().tolist()
@@ -106,15 +107,47 @@ def create_pseudo_node(node_type, dicts, required_fields, optional_fields):
 
 
 dicts = [
-    {"name": "John", "age": 30},
-    {"name": "Jane", "age": 25},
-    {"name": "Alice", "age": 28},
-    {"name": "Bob", "age": 22},
-    {"name": "Charlie", "age": 35},
-    {"name": "Dave", "age": 40},
-    {"name": "Eve", "age": 29},
-    {"name": "Frank", "age": 33},
-    {"name": "Grace", "age": 24}
+    {"name": "John", "age": 30, "city": "New York", "occupation": "Engineer", "salary": 85000, "married": True},
+    {"name": "Jane", "age": 25, "city": "Chicago", "occupation": "Designer", "hobby": "Photography"},
+    {"name": "Alice", "age": 28, "city": "San Francisco", "salary": 92000, "married": False},
+    {"name": "Bob", "age": 22, "occupation": "Student", "hobby": "Gaming"},
+    {"name": "Charlie", "age": 35, "city": "Austin", "occupation": "Manager", "salary": 105000},
+    {"name": "Dave", "age": 40, "city": "Boston", "occupation": "Consultant", "salary": 120000, "married": True, "hobby": "Golf"},
+    {"name": "Eve", "age": 29, "occupation": "Artist", "hobby": "Painting"},
+    {"name": "Frank", "age": 33, "city": "Seattle", "salary": 98000, "married": False},
+    {"name": "Grace", "age": 24, "city": "Denver", "occupation": "Researcher", "married": True},
+    {"name": "Hannah", "age": 31, "city": "Miami", "occupation": "Chef", "salary": 60000, "hobby": "Traveling"},
+    {"name": "Ian", "age": 27, "city": "Dallas", "occupation": "Photographer", "salary": 45000},
+    {"name": "Jill", "age": 26, "city": "Portland", "occupation": "Nurse", "married": False, "hobby": "Reading"},
+    {"name": "Kyle", "age": 29, "city": "Los Angeles", "occupation": "Software Developer", "salary": 95000},
+    {"name": "Laura", "age": 34, "city": "Houston", "occupation": "Analyst", "salary": 83000, "married": True},
+    {"name": "Mark", "age": 36, "city": "Phoenix", "occupation": "Teacher", "hobby": "Cooking"},
+    {"name": "Nina", "age": 23, "city": "Philadelphia", "salary": 72000, "married": False},
+    {"name": "Oscar", "age": 32, "city": "San Diego", "occupation": "Architect", "salary": 88000, "married": True},
+    {"name": "Paula", "age": 37, "city": "Atlanta", "occupation": "Lawyer", "salary": 140000, "hobby": "Hiking"},
+    {"name": "Quinn", "age": 28, "city": "Orlando", "occupation": "Musician", "hobby": "Writing"},
+    {"name": "Rachel", "age": 30, "city": "Nashville", "occupation": "Event Planner", "married": True, "hobby": "Dancing"}
 ]
 
-print(create_groups(dicts, create_groups_for_node({}, 1, 3, len(dicts))))
+min_group_length = 1
+max_group_length = 5
+node_type = "PERSON"
+
+group_sizes = create_groups_for_node(dicts, min_group_length, max_group_length, len(dicts))
+groups = create_groups(dicts, group_sizes)
+# print(groups)
+list_dict = {f"{i}": sublist for i, sublist in enumerate(groups)}
+print(list_dict)
+
+group_wise_pseudo_nodes = {}
+dicts_df = pd.DataFrame(dicts)
+# required_fields and optional_fields are to be decided after the manual analysis
+for key, _ in list_dict.items():
+    pseudo_node = create_pseudo_node(node_type, dicts_df, required_fields=["name", "age"], optional_fields=["occupation", "city", "married", "hobby"])
+    group_wise_pseudo_nodes[key] = pseudo_node
+
+print(group_wise_pseudo_nodes)
+
+# print(create_groups(dicts, create_groups_for_node({}, 1, 3, len(dicts))))
+# after creating groups, create pseudo node for every group of every node type
+

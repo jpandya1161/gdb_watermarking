@@ -11,6 +11,7 @@ from py2neo import Graph
 import random
 import pandas as pd
 from pandas import json_normalize
+import hashlib
 
 # Connect to the graph database (replace with your connection details)
 # graph = Graph("bolt://localhost:7687", auth=("neo4j", "password"))
@@ -142,12 +143,29 @@ print(list_dict)
 group_wise_pseudo_nodes = {}
 dicts_df = pd.DataFrame(dicts)
 # required_fields and optional_fields are to be decided after the manual analysis
+
+# after creating groups, create pseudo node for every group of every node type
 for key, _ in list_dict.items():
     pseudo_node = create_pseudo_node(node_type, dicts_df, required_fields=["name", "age"], optional_fields=["occupation", "city", "married", "hobby"])
     group_wise_pseudo_nodes[key] = pseudo_node
 
 print(group_wise_pseudo_nodes)
 
-# print(create_groups(dicts, create_groups_for_node({}, 1, 3, len(dicts))))
-# after creating groups, create pseudo node for every group of every node type
+private_key = "e8d3cba12a8d4c3b9a12f4e7c5d1a8f2"
+print(len(private_key))
+
+# Watermarking:
+# need private key, identity, field to be watermarked, fields used while watermarking
+
+def watermark_pseudo_node(pseudo_node, private_key, watermark_identity, wm_attribute, attributes, max_num_fields):
+    # wm_attribute is a numerical field of a pseudo-node
+    # attributes is a list of all the attributes of the pseudo-node
+    # watermark_identity = ?
+    watermark_secret = watermark_identity + "".join(attributes) + private_key
+    hashed_secret = hashlib.sha256(watermark_secret.encode("utf-8")).digest()
+    hashed_secret_int = int.from_bytes(hashed_secret, byteorder="big") % max_num_fields
+    pseudo_node[wm_attribute] = hashed_secret_int
+
+    return pseudo_node
+
 

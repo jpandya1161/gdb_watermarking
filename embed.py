@@ -157,15 +157,78 @@ print(len(private_key))
 # Watermarking:
 # need private key, identity, field to be watermarked, fields used while watermarking
 
-def watermark_pseudo_node(pseudo_node, private_key, watermark_identity, wm_attribute, attributes, max_num_fields):
+def watermark_pseudo_node(pseudo_node, private_key, watermark_identity, attributes, max_num_fields):
     # wm_attribute is a numerical field of a pseudo-node
     # attributes is a list of all the attributes of the pseudo-node
     # watermark_identity = ?
     watermark_secret = watermark_identity + "".join(attributes) + private_key
     hashed_secret = hashlib.sha256(watermark_secret.encode("utf-8")).digest()
     hashed_secret_int = int.from_bytes(hashed_secret, byteorder="big") % max_num_fields
-    pseudo_node[wm_attribute] = hashed_secret_int
+    pseudo_node["hashed_secret"] = hashed_secret_int
+    pseudo_node["watermark_id"] = watermark_identity
 
     return pseudo_node
 
+# Parameters
+n = len(group_wise_pseudo_nodes)
+lower_limit = 1
+upper_limit = 100
 
+# Generate n unique random numbers
+unique_random_numbers = random.sample(range(lower_limit, upper_limit + 1), n)
+
+print("Unique random numbers:", unique_random_numbers)
+
+# Watermarking parameters
+watermark_identity = unique_random_numbers
+private_key = "e8d3cba12a8d4c3b9a12f4e7c5d1a8f2"
+max_num_fields = 1000
+
+# Initialize an empty list to store the watermarked pseudo nodes
+watermarked_pseudo_nodes = []
+
+# Initialize a dictionary to store the mapping of unique random numbers to hashed watermarked values
+id_list = {}
+
+# Iterate through the pseudo nodes, apply watermarking, and store mappings
+for i, node in enumerate(group_wise_pseudo_nodes):
+    # Generate the watermarked node
+    watermarked_node = watermark_pseudo_node(
+        group_wise_pseudo_nodes[node],
+        private_key,
+        str(watermark_identity[i]),
+        [str(group_wise_pseudo_nodes[node]["age"])],
+        max_num_fields
+    )
+    # Append the watermarked node to the list
+    watermarked_pseudo_nodes.append(watermarked_node)
+
+    # Map the unique random number to its corresponding watermarked value (hashed)
+    id_list[watermark_identity[i]] = watermarked_node['hashed_secret']  # Assuming `watermarked_node` is hashed
+
+# Print the resulting id_list
+print("ID List:")
+for key, value in id_list.items():
+    print(f"Unique Random Number: {key}, Hashed Watermarked Value: {value}")
+
+
+# Append watermarked pseudo nodes to their respective groups in list_dict
+for key, group in list_dict.items():
+    # Retrieve the corresponding watermarked pseudo node
+    watermarked_node = watermarked_pseudo_nodes[int(key)]
+
+    # Add the watermarked node to the group
+    group.append(watermarked_node)
+
+# Print the updated list_dict
+print("Updated list_dict with watermarked pseudo nodes:")
+for group_key, group_value in list_dict.items():
+    print(f"Group {group_key}: {group_value}")
+
+from itertools import chain
+
+# Flatten the list using itertools.chain
+full_data = list(chain(*list_dict.values()))
+
+# Now combined_data will be a single list with all records
+print(full_data)

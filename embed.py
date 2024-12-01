@@ -102,6 +102,8 @@ class Embed:
         if watermark_id_field in attributes:
             attributes.remove(watermark_id_field)
 
+        attributes = sorted(attributes)
+        
         watermark_secret = ""
 
         for attribute in attributes:

@@ -1,5 +1,7 @@
 import pandas as pd
 import uuid
+import random
+import matplotlib.pyplot as plt
 from db import DB
 from embed import Embed
 from validate import Validate
@@ -120,9 +122,51 @@ class Driver:
         else:
             return False
 
-    def verify_deletion(self):
-        pass
+    def verify_deletion(self):  # To preserve the original dataset
+        deleted_nodes_percentage, valid_watermarks_detected = self.perform_deletion_attack(node_type="Company", step=2)
 
+        # Plotting the results
+        plt.figure(figsize=(10, 6))
+        plt.plot(deleted_nodes_percentage, valid_watermarks_detected, marker='o', color='b')
+
+        # Adding labels and title
+        plt.title('Effect of Deletion Attack on Valid Watermarks Detection')
+        plt.xlabel('Percentage of Deleted Nodes (%)')
+        plt.ylabel('Number of Valid Watermarks Detected')
+        plt.grid(True)
+        plt.show()
+
+    def perform_deletion_attack(self, node_type, step=1):
+        """
+        Perform deletion attack while tracking valid watermarks.
+        """
+        data = self.fake_data[node_type]
+        total_records = len(data)
+        deleted_nodes_percentage = []
+        valid_watermarks_detected = []
+
+        iterations = 0
+        validate = Validate(data, node_type=node_type, private_key=self.private_key)
+        while data and validate.validate_watermark(self.wm_secret[node_type], self.fields_dict[node_type][2]):
+            # Randomly delete `step` records
+            for _ in range(step):
+                if data:
+                    data.pop(random.randint(0, len(data) - 1))
+
+            # Calculate the percentage of deleted nodes
+            deleted_percentage = ((total_records - len(data)) / total_records) * 100
+            deleted_nodes_percentage.append(deleted_percentage)
+
+            # Validate watermarks in the remaining data
+            valid_watermarks_records = validate.validate_watermark_all(self.wm_secret[node_type], self.fields_dict[node_type][2])
+            valid_watermarks_detected.append(valid_watermarks_records)  # Append here
+
+            iterations += 1
+            print(f"Iteration {iterations}: Remaining records = {len(data)}, Valid Watermarks Detected = {valid_watermarks_records}")
+
+        print(f"Watermark verification failed after {iterations} iterations.")
+        return deleted_nodes_percentage, valid_watermarks_detected
+    
     def verify_group_parameters(self):
         pass
 
@@ -180,6 +224,7 @@ class Driver:
         self.print_watermark_secret()
         self.generate_fake_data()
         print(f"Watermark Verified!" if self.validate() else "No Watermark Found!")
+        self.verify_deletion()
 
 if __name__ == "__main__":    
     driver = Driver()    

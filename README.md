@@ -53,18 +53,19 @@ pip install -r requirements.txt
 3. **Set Up the Database**  
    - Start the Neo4j database server.  
    - Access the Neo4j browser at `http://localhost:7474`.  
-   - Set up the database credentials (default username: `neo4j`, password: `neo4j`). Update the password as prompted.  
+   - Set up the database credentials (default username: `neo4j`). Update the password as prompted.  
 
 4. **Using Py2neo for Queries**  
    - Install Py2neo using the following command:  
      ```bash
      pip install py2neo
      ```
-   - Update the connection details in your Python scripts (e.g., `insert_watermark.py`) to match your Neo4j database credentials.  
+   - Update the connection details in your Python scripts to match your Neo4j database credentials.  
    - Example connection code:  
      ```python
      from py2neo import Graph
-     graph = Graph("bolt://localhost:7687", auth=("neo4j", "your_password"))
+     graph = Graph("neo4j://localhost:7687", auth=("<Your Username>", "<Your Password>"))
+
      ```
 
 

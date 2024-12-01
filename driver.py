@@ -7,7 +7,7 @@ from fake_data_company import FakeDataCompany
 
 
 class Driver:
-    def __init__(self, uri="bolt://localhost:7687", user="neo4j", password="password"):
+    def __init__(self, uri="neo4j://localhost:7687", user="neo4j", password="Password"):
         self.db = DB(uri, user, password)
         try:
             self.db.connect()
@@ -32,23 +32,52 @@ class Driver:
             print(f"An error occurred: {e}")
 
     def select_node_type(self):
-        node_type = input("Enter the node type")
+        node_type = input("Enter the node type: ")
 
         if node_type == "all":
-            for node in self.db_summary["node_type"]:
-                self.data_dict[node] = self.db.query_nodes(node)
+            self.db_summary = {"node_types": [{"labels": ["Company"]}]}
+
+            for node in self.db_summary["node_types"]:
+                # print(node)
+                nodes = self.db.query_nodes(node["labels"][0])
+                nodes = [dict(node1["n"]) for node1 in nodes][:1000]
+
+                new_nodes = []
+
+                for one_node in nodes:
+                    # [print(type(value)) for value in one_node.values()]
+                    new_node = one_node
+                    for key, value in one_node.items():
+                        if isinstance(value, str):  # Check if the value is a string
+                            # Try to convert to an integer or float
+                            try:
+                                one_node[key] = int(value)
+                            except ValueError:
+                                try:
+                                    one_node[key] = float(value)
+                                except ValueError:
+                                    pass
+
+                    new_nodes.append(new_node)
+
+                self.data_dict[node["labels"][0]] = new_nodes
 
     def select_group_params(self):
-        self.group_min_len = int(input("Enter group min length: "))
-        self.group_max_len = int(input("Enter group max length: "))
+        self.group_min_len = 1
+        # int(input("Enter group min length: "))
+        self.group_max_len = 5
+        # int(input("Enter group max length: "))
 
     def select_fields(self):
         for node_type, nodes in self.data_dict.items():
             print(f"For Node type: {node_type}, \n")
             self.analyze_keys(nodes)
-            required_fields = input("Enter the required fields: ").split(" ")
-            optional_fields = input("Enter the optional fields: ").split(" ")
-            watermark_cover_field = input("Enter the watermark cover field: ")
+            required_fields = ["companyNumber"]
+            # input("Enter the required fields: ").split(" ")
+            optional_fields = ["mortgagesOutstanding", "category"]
+            # input("Enter the optional fields: ").split(" ")
+            watermark_cover_field = "company_id"
+            # input("Enter the watermark cover field: ")
             self.fields_dict[node_type] = (required_fields, optional_fields, watermark_cover_field)
 
     def get_private_key(self):
@@ -56,13 +85,14 @@ class Driver:
 
     def watermark(self):
         for node_type, nodes in self.data_dict.items():
-            embed = Embed(nodes, node_type=node_type, private_key=self.get_private_key(), max_num_fields=len(nodes))
+            embed = Embed(nodes, node_type=node_type, private_key=self.get_private_key())
             embed.embed(required_fields=self.fields_dict[node_type][0], optional_fields=self.fields_dict[node_type][1],
                         watermark_cover_field=self.fields_dict[node_type][2])
             self.wm_data_dict[node_type] = embed.watermarked_data
             self.wm_secret[node_type] = embed.watermarked_nodes_dict
 
     def print_watermark_secret(self):
+        print("\n PRINTING WATERMARK SECRET: ")
         print(self.private_key)
         print(self.wm_secret)
 
@@ -70,7 +100,7 @@ class Driver:
         # TODO: fake to real ratio
         for node_type, wm_data in self.wm_data_dict.items():
             num_fake_data = int(input(f"For {node_type}, Enter the number of fake data: "))
-            ratio = float(input(f"For {node_type}, Enter the fake-to-real ratio between 0 and 1: "))
+            ratio = float(input(f"For {node_type}, Enter the real-to-fake ratio between 0 and 1: "))
             if node_type.lower() == "company":
                 fake_data_company = FakeDataCompany()
                 fake_data = fake_data_company.create_random_company_data_with_real(num_fake_data, wm_data, ratio)
@@ -80,7 +110,7 @@ class Driver:
         counter = 0
 
         for node_type, nodes in self.wm_data_dict.items():
-            validate = Validate(data=nodes, node_type=node_type)
+            validate = Validate(data=nodes, node_type=node_type, private_key=self.get_private_key())
             result = validate.validate_watermark(wm_id_dict=self.wm_secret[node_type],
                                                  watermark_cover_field=self.fields_dict[node_type][2])
             counter += 1 if result else 0
@@ -102,8 +132,10 @@ class Driver:
         if not records:
             return "No records to analyze."
 
+        print(records[0])
         # Convert the list of dictionaries to a DataFrame
         df = pd.DataFrame(records)
+
 
         # Get keys present in all records
         common_keys = df.columns[df.notnull().all()].tolist()
@@ -112,7 +144,25 @@ class Driver:
         partial_keys = df.columns[df.isnull().any()].tolist()
 
         # Separate numerical and non-numerical keys
-        numerical_keys = [key for key in df.columns if pd.to_numeric(df[key], errors='coerce').notnull().all()]
+        numerical_keys = []
+        # Identify numeric columns
+        # numeric_keys = []
+
+        for key in df.columns:
+            # Get the first non-null value in the column
+            first_valid = df[key].dropna().iloc[0] if not df[key].dropna().empty else None
+            
+            # Check its type
+            if first_valid is not None:
+                try:
+                    # Attempt to convert it to float
+                    float(first_valid)
+                    numerical_keys.append(key)
+                except Exception as e:
+                    # Skip if conversion to float fails
+                    pass
+
+
         non_numerical_keys = [key for key in df.columns if key not in numerical_keys]
 
         # Print the results
@@ -130,3 +180,7 @@ class Driver:
         self.print_watermark_secret()
         self.generate_fake_data()
         print(f"Watermark Verified!" if self.validate() else "No Watermark Found!")
+
+if __name__ == "__main__":    
+    driver = Driver()    
+    driver.execute()

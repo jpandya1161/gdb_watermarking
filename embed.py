@@ -95,15 +95,27 @@ class Embed:
 
         return pseudo_node
 
-    def watermark_pseudo_node(self, pseudo_node, watermark_identity, watermark_id_field, attributes):
+    def watermark_pseudo_node(self, pseudo_node, watermark_identity, watermark_id_field, attributes, validate=False):
         # wm_attribute is a numerical field of a pseudo-node
         # attributes is a list of all the attributes of the pseudo-node
         # watermark_identity = ?
-        watermark_secret = watermark_identity + "".join(attributes) + self.private_key
+        if watermark_id_field in attributes:
+            attributes.remove(watermark_id_field)
+
+        watermark_secret = ""
+
+        for attribute in attributes:
+            watermark_secret += str(pseudo_node[attribute])
+        
+        watermark_secret = watermark_identity + watermark_secret + self.private_key
+
+        # print("wm_secret")
+        # print(watermark_secret)
         hashed_secret = hashlib.sha256(watermark_secret.encode("utf-8")).digest()
         hashed_secret_int = int.from_bytes(hashed_secret, byteorder="big") % self.max_num_fields
         # pseudo_node["hashed_secret"] = hashed_secret_int
-        pseudo_node[watermark_id_field] = watermark_identity
+        if not validate:
+            pseudo_node[watermark_id_field] = int(watermark_identity)
 
         return pseudo_node, hashed_secret_int
 
@@ -125,6 +137,11 @@ class Embed:
         # Iterate through the pseudo nodes, apply watermarking, and store mappings
         for i, node in enumerate(group_wise_pseudo_nodes):
             wm_attributes = [key for key, value in group_wise_pseudo_nodes[node].items() if isinstance(value, (int, float))]
+            
+            # print("watermarking")
+            # print(group_wise_pseudo_nodes[node])
+            # print(watermark_id_list[i], wm_attributes)
+            
             # Generate the watermarked node
             watermarked_node, hashed_secret_int = self.watermark_pseudo_node(
                 group_wise_pseudo_nodes[node],
@@ -152,9 +169,9 @@ class Embed:
             group.append(watermarked_node)
 
         # Print the updated list_dict
-        print("Updated list_dict with watermarked pseudo nodes:")
-        for group_key, group_value in groups_dict.items():
-            print(f"Group {group_key}: {group_value}")
+        # print("Updated list_dict with watermarked pseudo nodes:")
+        # for group_key, group_value in groups_dict.items():
+        #     print(f"Group {group_key}: {group_value}")
 
         # Flatten the list using itertools.chain
         self.watermarked_data = list(chain(*groups_dict.values()))
@@ -186,9 +203,8 @@ class Embed:
 
         min_group_length = 1
         max_group_length = 5
-        # node_type = "PERSON"
 
-        group_partitions = self.generate_group_partitions(min_group_length, max_group_length, len(dicts))
+        group_partitions = self.generate_group_partitions(min_group_length, max_group_length, len(self.data))
         groups = self.generate_groups(group_partitions)
         # print(groups)
         groups_dict = {f"{i}": sublist for i, sublist in enumerate(groups)}
@@ -215,36 +231,36 @@ class Embed:
         # Iterate through each group in list_dict and assign company_id
 
 
-if __name__ == "__main__":
-    dicts = [
-        {"name": "John", "age": 30, "city": "New York", "occupation": "Engineer", "salary": 85000, "married": True},
-        {"name": "Jane", "age": 25, "city": "Chicago", "occupation": "Designer", "hobby": "Photography"},
-        {"name": "Alice", "age": 28, "city": "San Francisco", "salary": 92000, "married": False},
-        {"name": "Bob", "age": 22, "occupation": "Student", "hobby": "Gaming"},
-        {"name": "Charlie", "age": 35, "city": "Austin", "occupation": "Manager", "salary": 105000},
-        {"name": "Dave", "age": 40, "city": "Boston", "occupation": "Consultant", "salary": 120000, "married": True,
-         "hobby": "Golf"},
-        {"name": "Eve", "age": 29, "occupation": "Artist", "hobby": "Painting"},
-        {"name": "Frank", "age": 33, "city": "Seattle", "salary": 98000, "married": False},
-        {"name": "Grace", "age": 24, "city": "Denver", "occupation": "Researcher", "married": True},
-        {"name": "Hannah", "age": 31, "city": "Miami", "occupation": "Chef", "salary": 60000, "hobby": "Traveling"},
-        {"name": "Ian", "age": 27, "city": "Dallas", "occupation": "Photographer", "salary": 45000},
-        {"name": "Jill", "age": 26, "city": "Portland", "occupation": "Nurse", "married": False, "hobby": "Reading"},
-        {"name": "Kyle", "age": 29, "city": "Los Angeles", "occupation": "Software Developer", "salary": 95000},
-        {"name": "Laura", "age": 34, "city": "Houston", "occupation": "Analyst", "salary": 83000, "married": True},
-        {"name": "Mark", "age": 36, "city": "Phoenix", "occupation": "Teacher", "hobby": "Cooking"},
-        {"name": "Nina", "age": 23, "city": "Philadelphia", "salary": 72000, "married": False},
-        {"name": "Oscar", "age": 32, "city": "San Diego", "occupation": "Architect", "salary": 88000, "married": True},
-        {"name": "Paula", "age": 37, "city": "Atlanta", "occupation": "Lawyer", "salary": 140000, "hobby": "Hiking"},
-        {"name": "Quinn", "age": 28, "city": "Orlando", "occupation": "Musician", "hobby": "Writing"},
-        {"name": "Rachel", "age": 30, "city": "Nashville", "occupation": "Event Planner", "married": True,
-         "hobby": "Dancing"}
-    ]
-    embed = Embed(data=dicts, node_type="PERSON")
-    embed.embed(required_fields=["name", "age"], optional_fields=["city", "occupation"], watermark_cover_field="company_id")
+# if __name__ == "__main__":
+#     dicts = [
+#         {"name": "John", "age": 30, "city": "New York", "occupation": "Engineer", "salary": 85000, "married": True},
+#         {"name": "Jane", "age": 25, "city": "Chicago", "occupation": "Designer", "hobby": "Photography"},
+#         {"name": "Alice", "age": 28, "city": "San Francisco", "salary": 92000, "married": False},
+#         {"name": "Bob", "age": 22, "occupation": "Student", "hobby": "Gaming"},
+#         {"name": "Charlie", "age": 35, "city": "Austin", "occupation": "Manager", "salary": 105000},
+#         {"name": "Dave", "age": 40, "city": "Boston", "occupation": "Consultant", "salary": 120000, "married": True,
+#          "hobby": "Golf"},
+#         {"name": "Eve", "age": 29, "occupation": "Artist", "hobby": "Painting"},
+#         {"name": "Frank", "age": 33, "city": "Seattle", "salary": 98000, "married": False},
+#         {"name": "Grace", "age": 24, "city": "Denver", "occupation": "Researcher", "married": True},
+#         {"name": "Hannah", "age": 31, "city": "Miami", "occupation": "Chef", "salary": 60000, "hobby": "Traveling"},
+#         {"name": "Ian", "age": 27, "city": "Dallas", "occupation": "Photographer", "salary": 45000},
+#         {"name": "Jill", "age": 26, "city": "Portland", "occupation": "Nurse", "married": False, "hobby": "Reading"},
+#         {"name": "Kyle", "age": 29, "city": "Los Angeles", "occupation": "Software Developer", "salary": 95000},
+#         {"name": "Laura", "age": 34, "city": "Houston", "occupation": "Analyst", "salary": 83000, "married": True},
+#         {"name": "Mark", "age": 36, "city": "Phoenix", "occupation": "Teacher", "hobby": "Cooking"},
+#         {"name": "Nina", "age": 23, "city": "Philadelphia", "salary": 72000, "married": False},
+#         {"name": "Oscar", "age": 32, "city": "San Diego", "occupation": "Architect", "salary": 88000, "married": True},
+#         {"name": "Paula", "age": 37, "city": "Atlanta", "occupation": "Lawyer", "salary": 140000, "hobby": "Hiking"},
+#         {"name": "Quinn", "age": 28, "city": "Orlando", "occupation": "Musician", "hobby": "Writing"},
+#         {"name": "Rachel", "age": 30, "city": "Nashville", "occupation": "Event Planner", "married": True,
+#          "hobby": "Dancing"}
+#     ]
+#     embed = Embed(data=dicts, node_type="PERSON")
+#     embed.embed(required_fields=["name", "age"], optional_fields=["city", "occupation"], watermark_cover_field="company_id")
 
-    print("")
-    print(len(pd.DataFrame(embed.watermarked_data)["company_id"].unique()))
+    # print("")
+    # print(len(pd.DataFrame(embed.watermarked_data)["company_id"].unique()))
 
 
 

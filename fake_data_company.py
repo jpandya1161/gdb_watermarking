@@ -59,6 +59,8 @@ class FakeDataCompany:
             }
             random_data.append(fake_entry)
 
+        print(random_data[:5])
+        
         return random_data
 
 # Sample original company data (this would come from an external source in a real scenario)

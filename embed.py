@@ -107,7 +107,7 @@ class Embed:
 
         return pseudo_node, hashed_secret_int
 
-    def insert_pseudo_nodes(self, group_wise_pseudo_nodes, groups_dict):
+    def insert_pseudo_nodes(self, group_wise_pseudo_nodes, groups_dict, watermark_cover_field):
         upper_limit = n = len(group_wise_pseudo_nodes)
         lower_limit = 1
 
@@ -124,12 +124,13 @@ class Embed:
 
         # Iterate through the pseudo nodes, apply watermarking, and store mappings
         for i, node in enumerate(group_wise_pseudo_nodes):
+            wm_attributes = [key for key, value in group_wise_pseudo_nodes[node].items() if isinstance(value, (int, float))]
             # Generate the watermarked node
             watermarked_node, hashed_secret_int = self.watermark_pseudo_node(
                 group_wise_pseudo_nodes[node],
                 str(watermark_id_list[i]),
-                "company_id",
-                [str(group_wise_pseudo_nodes[node]["age"])]
+                watermark_cover_field,
+                wm_attributes
             )
             # Append the watermarked node to the list
             watermarked_pseudo_nodes.append(watermarked_node)
@@ -158,20 +159,20 @@ class Embed:
         # Flatten the list using itertools.chain
         self.watermarked_data = list(chain(*groups_dict.values()))
 
-    def insert_watermark_cover_field(self, nodes_list):
-        upper_limit = n = len(nodes_list)
+    def insert_watermark_cover_field(self, nodes_list, watermark_cover_field):
+        upper_limit = len(nodes_list)
         lower_limit = 1
 
         result_nodes_list = []
         already_used_ids = list(self.watermarked_nodes_dict.keys())
 
         for i, node in enumerate(nodes_list):
-            if "company_id" not in node.keys():
+            if watermark_cover_field not in node.keys():
                 while True:
                     new_company_id = random.choice(range(lower_limit, upper_limit + 1))
                     if new_company_id not in already_used_ids:
                         # print("HEY", new_company_id)
-                        node["company_id"] = new_company_id
+                        node[watermark_cover_field] = new_company_id
                         already_used_ids.append(new_company_id)
                         break
 
@@ -179,7 +180,7 @@ class Embed:
 
         return result_nodes_list
 
-    def embed(self, required_fields=("birthMonth", "birthYear"), optional_fields=("nationality", )):
+    def embed(self, watermark_cover_field, required_fields=("birthMonth", "birthYear"), optional_fields=("nationality", )):
         self.watermarked_nodes_dict = {}
         self.watermarked_data = []
 
@@ -209,7 +210,7 @@ class Embed:
 
         print(len(self.watermarked_data))
 
-        self.watermarked_data = self.insert_watermark_cover_field(self.watermarked_data)
+        self.watermarked_data = self.insert_watermark_cover_field(self.watermarked_data, watermark_cover_field)
 
         # Iterate through each group in list_dict and assign company_id
 

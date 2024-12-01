@@ -37,7 +37,7 @@ class Driver:
         node_type = input("Enter the node type: ")
 
         if node_type == "all":
-            self.db_summary = {"node_types": [{"labels": ["Company"]}]}
+            # self.db_summary = {"node_types": [{"labels": ["Company"]}]}
 
             for node in self.db_summary["node_types"]:
                 # print(node)
@@ -65,21 +65,16 @@ class Driver:
                 self.data_dict[node["labels"][0]] = new_nodes
 
     def select_group_params(self):
-        self.group_min_len = 1
-        # int(input("Enter group min length: "))
-        self.group_max_len = 5
-        # int(input("Enter group max length: "))
+        self.group_min_len = int(input("Enter group min length: "))
+        self.group_max_len = int(input("Enter group max length: "))
 
     def select_fields(self):
         for node_type, nodes in self.data_dict.items():
             print(f"For Node type: {node_type}, \n")
             self.analyze_keys(nodes)
-            required_fields = ["companyNumber"]
-            # input("Enter the required fields: ").split(" ")
-            optional_fields = ["mortgagesOutstanding", "category"]
-            # input("Enter the optional fields: ").split(" ")
-            watermark_cover_field = "company_id"
-            # input("Enter the watermark cover field: ")
+            required_fields = input("Enter the required fields: ").split(" ")
+            optional_fields = input("Enter the optional fields: ").split(" ")
+            watermark_cover_field = input("Enter the watermark cover field: ")
             self.fields_dict[node_type] = (required_fields, optional_fields, watermark_cover_field)
 
     def get_private_key(self):
@@ -107,6 +102,21 @@ class Driver:
                 fake_data_company = FakeDataCompany()
                 fake_data = fake_data_company.create_random_company_data_with_real(num_fake_data, wm_data, ratio)
                 self.fake_data[node_type] = fake_data
+            
+            # if node_type.lower() == "person":
+            #     fake_data_company = FakeDataPerson()
+            #     fake_data = fake_data_company.create_random_company_data_with_real(num_fake_data, wm_data, ratio)
+            #     self.fake_data[node_type] = fake_data
+            
+            # if node_type.lower() == "property":
+            #     fake_data_company = FakeDataProperty()
+            #     fake_data = fake_data_company.create_random_company_data_with_real(num_fake_data, wm_data, ratio)
+            #     self.fake_data[node_type] = fake_data
+
+            # if node_type.lower() == "recipient":
+            #     fake_data_company = FakeDataRecipient()
+            #     fake_data = fake_data_company.create_random_company_data_with_real(num_fake_data, wm_data, ratio)
+            #     self.fake_data[node_type] = fake_data
 
     def validate(self):
         counter = 0

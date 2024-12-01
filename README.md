@@ -37,8 +37,36 @@ pip install -r requirements.txt
 ```
 
 ## Set up Neo4j
-Download and install Neo4j from Neo4j's official website.
-Start the Neo4j database server and set up the database as required.
+
+1. **Download and Install Neo4j**  
+   - Download Neo4j from its [official website](https://neo4j.com/download/).  
+   - Follow the installation instructions for your operating system.  
+
+2. **Install Plugins**  
+   - Install the APOC plugin for advanced procedures.  
+   - Enable the plugin by adding the following lines to the `neo4j.conf` file:  
+     ```plaintext
+     dbms.security.procedures.unrestricted=apoc.*
+     dbms.security.procedures.allowlist=apoc.*
+     ```
+
+3. **Set Up the Database**  
+   - Start the Neo4j database server.  
+   - Access the Neo4j browser at `http://localhost:7474`.  
+   - Set up the database credentials (default username: `neo4j`, password: `neo4j`). Update the password as prompted.  
+
+4. **Using Py2neo for Queries**  
+   - Install Py2neo using the following command:  
+     ```bash
+     pip install py2neo
+     ```
+   - Update the connection details in your Python scripts (e.g., `insert_watermark.py`) to match your Neo4j database credentials.  
+   - Example connection code:  
+     ```python
+     from py2neo import Graph
+     graph = Graph("bolt://localhost:7687", auth=("neo4j", "your_password"))
+     ```
+
 
 ## Usage
 Watermark Insertion

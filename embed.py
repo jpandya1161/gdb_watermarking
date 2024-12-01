@@ -158,6 +158,26 @@ class Embed:
         # Flatten the list using itertools.chain
         self.watermarked_data = list(chain(*groups_dict.values()))
 
+    def insert_watermark_cover_field(self, nodes_list):
+        upper_limit = n = len(nodes_list)
+        lower_limit = 1
+
+        result_nodes_list = []
+        already_used_ids = list(self.watermarked_nodes_dict.keys())
+
+        for i, node in enumerate(nodes_list):
+            if "company_id" not in node.keys():
+                while True:
+                    new_company_id = random.choice(range(lower_limit, upper_limit + 1))
+                    if new_company_id not in already_used_ids:
+                        # print("HEY", new_company_id)
+                        node["company_id"] = new_company_id
+                        already_used_ids.append(new_company_id)
+                        break
+
+            result_nodes_list.append(node)
+
+        return result_nodes_list
 
     def embed(self, required_fields=("birthMonth", "birthYear"), optional_fields=("nationality", )):
         self.watermarked_nodes_dict = {}
@@ -187,6 +207,12 @@ class Embed:
 
         self.insert_pseudo_nodes(group_wise_pseudo_nodes, groups_dict)
 
+        print(len(self.watermarked_data))
+
+        self.watermarked_data = self.insert_watermark_cover_field(self.watermarked_data)
+
+        # Iterate through each group in list_dict and assign company_id
+
 
 if __name__ == "__main__":
     dicts = [
@@ -215,6 +241,9 @@ if __name__ == "__main__":
     ]
     embed = Embed(data=dicts, node_type="PERSON")
     embed.embed(required_fields=["name", "age"], optional_fields=["city", "occupation"])
-    print(embed.watermarked_data)
+
+    print("")
+    print(len(pd.DataFrame(embed.watermarked_data)["company_id"].unique()))
+
 
 

@@ -206,7 +206,7 @@ class Embed:
 
         print(group_wise_pseudo_nodes)
 
-        self.insert_pseudo_nodes(group_wise_pseudo_nodes, groups_dict)
+        self.insert_pseudo_nodes(group_wise_pseudo_nodes, groups_dict, watermark_cover_field)
 
         print(len(self.watermarked_data))
 
@@ -241,7 +241,7 @@ if __name__ == "__main__":
          "hobby": "Dancing"}
     ]
     embed = Embed(data=dicts, node_type="PERSON")
-    embed.embed(required_fields=["name", "age"], optional_fields=["city", "occupation"])
+    embed.embed(required_fields=["name", "age"], optional_fields=["city", "occupation"], watermark_cover_field="company_id")
 
     print("")
     print(len(pd.DataFrame(embed.watermarked_data)["company_id"].unique()))

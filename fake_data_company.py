@@ -34,9 +34,9 @@ class FakeDataCompany:
         ]
 
 # Function to generate random company data with 10% original data and 90% fake data
-    def create_random_company_data_with_real(self, num_entries, original_data):
+    def create_random_company_data_with_real(self, num_entries, original_data, ratio):
         random_data = []
-        original_data_count = int(num_entries * 0.1)  # 10% of the data will be real
+        original_data_count = int(num_entries * ratio)  # 10% of the data will be real
         fake_data_count = num_entries - original_data_count  # 90% will be fake
 
         # Add 10% real data

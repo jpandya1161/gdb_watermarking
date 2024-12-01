@@ -192,7 +192,7 @@ class Embed:
         groups = self.generate_groups(group_partitions)
         # print(groups)
         groups_dict = {f"{i}": sublist for i, sublist in enumerate(groups)}
-        print(groups_dict)
+        # print(groups_dict)
 
         group_wise_pseudo_nodes = {}
         # dicts_df = pd.DataFrame(dicts)
@@ -204,11 +204,11 @@ class Embed:
                                                     optional_fields=optional_fields)
             group_wise_pseudo_nodes[key] = pseudo_node
 
-        print(group_wise_pseudo_nodes)
+        # print(group_wise_pseudo_nodes)
 
         self.insert_pseudo_nodes(group_wise_pseudo_nodes, groups_dict, watermark_cover_field)
 
-        print(len(self.watermarked_data))
+        # print(len(self.watermarked_data))
 
         self.watermarked_data = self.insert_watermark_cover_field(self.watermarked_data, watermark_cover_field)
 

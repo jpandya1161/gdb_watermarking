@@ -1,7 +1,5 @@
 from py2neo import Graph
 
-# TODO: add database fetch query function
-
 
 class DB:
     def __init__(self, uri, user, password):

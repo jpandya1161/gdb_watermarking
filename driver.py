@@ -19,6 +19,10 @@ class Driver:
         self.db_summary = self.db.fetch_summary()
         self.data_dict = {}
         self.fields_dict = {}
+        self.private_key = uuid.uuid4().hex
+        self.wm_data_dict = {}
+        self.wm_secret = {}
+        self.fake_data = {}
 
     def print_db_info(self):
         try:
@@ -44,14 +48,33 @@ class Driver:
             self.analyze_keys(nodes)
             required_fields = input("Enter the required fields: ").split(" ")
             optional_fields = input("Enter the optional fields: ").split(" ")
-            self.fields_dict[node_type] = (required_fields, optional_fields)
+            watermark_cover_field = input("Enter the watermark cover field: ")
+            self.fields_dict[node_type] = (required_fields, optional_fields, watermark_cover_field)
 
-    def generate_private_key(self):
-        return uuid.uuid4().hex
+    def get_private_key(self):
+        return self.private_key
+
+    def watermark(self):
+        for node_type, nodes in self.data_dict.items():
+            embed = Embed(nodes, node_type=node_type, private_key=self.get_private_key(), max_num_fields=len(nodes))
+            embed.embed(required_fields=self.fields_dict[node_type][0], optional_fields=self.fields_dict[node_type][1],
+                        watermark_cover_field=self.fields_dict[node_type][2])
+            self.wm_data_dict[node_type] = embed.watermarked_data
+            self.wm_secret[node_type] = embed.watermarked_nodes_dict
+
+    def print_watermark_secret(self):
+        print(self.private_key)
+        print(self.wm_secret)
 
     def generate_fake_data(self):
         # TODO: fake to real ratio
-        pass
+        for node_type, wm_data in self.wm_data_dict.items():
+            num_fake_data = int(input(f"For {node_type}, Enter the number of fake data: "))
+            ratio = float(input(f"For {node_type}, Enter the fake-to-real ratio between 0 and 1: "))
+            if node_type.lower() == "company":
+                fake_data_company = FakeDataCompany()
+                fake_data = fake_data_company.create_random_company_data_with_real(num_fake_data, wm_data, ratio)
+                self.fake_data[node_type] = fake_data
 
     def validate(self):
         pass
@@ -87,6 +110,11 @@ class Driver:
         print("Numerical keys:", numerical_keys)
         print("Non-numerical keys:", non_numerical_keys)
 
-
-
-
+    def execute(self):
+        self.print_db_info()
+        self.select_node_type()
+        self.select_group_params()
+        self.select_fields()
+        self.watermark()
+        self.print_watermark_secret()
+        self.generate_fake_data()

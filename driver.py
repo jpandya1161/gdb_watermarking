@@ -77,7 +77,18 @@ class Driver:
                 self.fake_data[node_type] = fake_data
 
     def validate(self):
-        pass
+        counter = 0
+
+        for node_type, nodes in self.wm_data_dict.items():
+            validate = Validate(data=nodes, node_type=node_type)
+            result = validate.validate_watermark(wm_id_dict=self.wm_secret[node_type],
+                                                 watermark_cover_field=self.fields_dict[node_type][2])
+            counter += 1 if result else 0
+
+        if counter == len(self.data_dict.keys()):
+            return True
+        else:
+            return False
 
     def verify_deletion(self):
         pass
@@ -118,3 +129,4 @@ class Driver:
         self.watermark()
         self.print_watermark_secret()
         self.generate_fake_data()
+        print(f"Watermark Verified!" if self.validate() else "No Watermark Found!")

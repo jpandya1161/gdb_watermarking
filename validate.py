@@ -6,20 +6,20 @@ class Validate:
         self.data = data
         self.embed = Embed(data, node_type)
 
-    def validate_watermark(self, id_list, attributes):
+    def validate_watermark(self, wm_id_dict, watermark_cover_field):
         # Convert id_list to a set for fast membership checks
-        id_set = set(str(key) for key in id_list)  # Use set to avoid duplicates and improve lookup speed
+        # id_set = set(str(key) for key in id_list)  # Use set to avoid duplicates and improve lookup speed
 
         # Iterate over each record in the list with its index (record number)
         for index, record in enumerate(self.data):
+            attributes = [key for key, value in record.items() if isinstance(value, (int, float))]
             # Ensure the record has a 'watermark_id'
-            if 'company_id' in record:
-                watermark_id = str(record['company_id'])
-                if watermark_id in id_set:
+            if watermark_cover_field in record:
+                watermark_id = str(record[watermark_cover_field])
+                if watermark_id in wm_id_dict.keys():
                     record_hash, hashed_secret_int = self.embed.watermark_pseudo_node(record, watermark_id,
-                                                                                      "company_id",
-                                                                                      attributes)
-                    if hashed_secret_int == id_list[watermark_id]:
+                                                                                      watermark_cover_field, attributes)
+                    if hashed_secret_int == wm_id_dict[watermark_id]:
                         return True
                 else:
                     return False

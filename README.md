@@ -99,7 +99,8 @@ python3 driver.py
 8. After this, the watermark validation script will run to search for watermarks in the suspected data.
 
 ## Evaluation
-![db_wm_deletion.png](images%2Fdb_wm_deletion.png)
-![db_wm_embedding_time.png](images%2Fdb_wm_embedding_time.png)
-![db_wm_group_params.png](images%2Fdb_wm_group_params.png)
-![db_wm_insertion_attack.png](images%2Fdb_wm_insertion_attack.png)
+
+![Fig. 1: Embedding Performance](images%2Fdb_wm_embedding_time.png)
+![Fig. 2: Pseudo Node Group Parameters](images%2Fdb_wm_group_params.png)
+![Fig. 3: Simulating Deletion Attack](images%2Fdb_wm_deletion.png)
+![Fig. 4: Simulating Insertion Attack](images%2Fdb_wm_insertion_attack.png)

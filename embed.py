@@ -199,12 +199,9 @@ class Embed:
 
         return result_nodes_list
 
-    def embed(self, watermark_cover_field, required_fields=("birthMonth", "birthYear"), optional_fields=("nationality", )):
+    def embed(self,  watermark_cover_field, min_group_length=1, max_group_length=5, required_fields=("birthMonth", "birthYear"), optional_fields=("nationality", )):
         self.watermarked_nodes_dict = {}
         self.watermarked_data = []
-
-        min_group_length = 1
-        max_group_length = 5
 
         group_partitions = self.generate_group_partitions(min_group_length, max_group_length, len(self.data))
         groups = self.generate_groups(group_partitions)

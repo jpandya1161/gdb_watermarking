@@ -2,6 +2,7 @@ import pandas as pd
 import uuid
 import random
 import matplotlib.pyplot as plt
+import itertools
 from db import DB
 from embed import Embed
 from validate import Validate
@@ -70,6 +71,7 @@ class Driver:
 
     def select_fields(self):
         for node_type, nodes in self.data_dict.items():
+            # if node_type.lower() == "company":
             print(f"For Node type: {node_type}, \n")
             self.analyze_keys(nodes)
             required_fields = input("Enter the required fields: ").split(" ")
@@ -84,7 +86,7 @@ class Driver:
         for node_type, nodes in self.data_dict.items():
             embed = Embed(nodes, node_type=node_type, private_key=self.get_private_key())
             embed.embed(required_fields=self.fields_dict[node_type][0], optional_fields=self.fields_dict[node_type][1],
-                        watermark_cover_field=self.fields_dict[node_type][2])
+                        watermark_cover_field=self.fields_dict[node_type][2], min_group_length=self.group_min_len, max_group_length=self.group_max_len)
             self.wm_data_dict[node_type] = embed.watermarked_data
             self.wm_secret[node_type] = embed.watermarked_nodes_dict
 
@@ -177,8 +179,35 @@ class Driver:
         print(f"Watermark verification failed after {iterations} iterations.")
         return deleted_nodes_percentage, valid_watermarks_detected
     
-    def verify_group_parameters(self):
-        pass
+    def verify_group_parameters(self, node_type="Company"):
+        min_group_sizes = [5, 6, 7, 8, 9, 10]
+        max_group_sizes = [25, 50, 75, 100, 125, 150, 175, 200]
+        pseudonode_count = []
+        combinations = list(itertools.product(min_group_sizes, max_group_sizes))
+        x = []
+        y = []
+
+        data = self.data_dict[node_type]
+        embed = Embed(data, node_type=node_type)
+
+        for comb in combinations:
+            min_group_length, max_group_length = comb
+            embed.embed(required_fields=self.fields_dict[node_type][0], optional_fields=self.fields_dict[node_type][1],
+                        watermark_cover_field=self.fields_dict[node_type][2], min_group_length=min_group_length, 
+                        max_group_length=max_group_length)
+            pseudonode_count.append(len(embed.watermarked_nodes_dict.keys()))
+            x.append(min_group_length)
+            y.append(max_group_length)
+
+        fig = plt.figure()
+        ax =fig.add_subplot(111, projection="3d")
+        sc = ax.scatter(x, y, pseudonode_count, c=pseudonode_count, cmap="viridis")
+        ax.set_xlabel("Minimum Group Size")
+        ax.set_ylabel("Maximum Group Size")
+        ax.set_zlabel("Number of Pseudonodes")
+        plt.colorbar(sc)
+        plt.show()
+
 
     @staticmethod
     def analyze_keys(records):
@@ -235,6 +264,7 @@ class Driver:
         self.generate_fake_data()
         print(f"Watermark Verified!" if self.validate() else "No Watermark Found!")
         self.verify_deletion()
+        self.verify_group_parameters()
 
 if __name__ == "__main__":    
     driver = Driver()    

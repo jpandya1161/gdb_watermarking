@@ -4,6 +4,9 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+pandas = "*"
+matplotlib = "*"
+py2neo = "*"
 
 [dev-packages]
 

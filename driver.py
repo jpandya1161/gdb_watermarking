@@ -72,13 +72,13 @@ class Driver:
 
     def select_fields(self):
         for node_type, nodes in self.data_dict.items():
-            if node_type.lower() == "company":
-                print(f"For Node type: {node_type}, \n")
-                self.analyze_keys(nodes)
-                required_fields = input("Enter the required fields: ").split(" ")
-                optional_fields = input("Enter the optional fields: ").split(" ")
-                watermark_cover_field = input("Enter the watermark cover field: ")
-                self.fields_dict[node_type] = (required_fields, optional_fields, watermark_cover_field)
+            # if node_type.lower() == "company":
+            print(f"For Node type: {node_type}, \n")
+            self.analyze_keys(nodes)
+            required_fields = input("Enter the required fields: ").split(" ")
+            optional_fields = input("Enter the optional fields: ").split(" ")
+            watermark_cover_field = input("Enter the watermark cover field: ")
+            self.fields_dict[node_type] = (required_fields, optional_fields, watermark_cover_field)
 
     def get_private_key(self):
         return self.private_key
@@ -99,9 +99,9 @@ class Driver:
     def generate_fake_data(self):
         # TODO: fake to real ratio
         for node_type, wm_data in self.wm_data_dict.items():
-            num_fake_data = int(input(f"For {node_type}, Enter the number of fake data: "))
-            ratio = float(input(f"For {node_type}, Enter the real-to-fake ratio between 0 and 1: "))
             if node_type.lower() == "company":
+                num_fake_data = int(input(f"For {node_type}, Enter the number of fake data: "))
+                ratio = float(input(f"For {node_type}, Enter the real-to-fake ratio between 0 and 1: "))
                 fake_data_company = FakeDataCompany()
                 fake_data = fake_data_company.create_random_company_data_with_real(num_fake_data, wm_data, ratio)
                 self.fake_data[node_type] = fake_data
@@ -246,8 +246,8 @@ class Driver:
             print(f"Testing insertion attack with ratio: {ratio}")
             fake_data_company = FakeDataCompany()
             self.fake_data[node_type] = fake_data_company.create_random_company_data_with_real(
-                num_fake_data=len(self.wm_data_dict[node_type]),
-                wm_data=self.wm_data_dict[node_type],
+                num_entries=len(self.wm_data_dict[node_type]),
+                original_data=self.wm_data_dict[node_type],
                 ratio=ratio
             )
 
@@ -279,21 +279,61 @@ class Driver:
 
         return results
 
+    # def verify_insertion(self):
+    #     """
+    #     Verify watermark robustness under insertion attacks with varying ratios.
+    #     """
+    #     ratios = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
+    #     node_type = "Company"  # Adjust if needed for other node types
+
+    #     results = self.perform_insertion_attack(node_type=node_type, ratios=ratios)
+
+    #     # Display results in a readable format
+    #     print("\nInsertion Attack Results:")
+    #     for result in results:
+    #         print(f"Ratio: {result['ratio']}, Validation: {result['validation_result']}, Time: {result['time_taken']:.4f}s")
+
     def verify_insertion(self):
         """
-        Verify watermark robustness under insertion attacks with varying ratios.
+        Verify watermark robustness under insertion attacks with varying ratios and plot the results.
         """
         ratios = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
         node_type = "Company"  # Adjust if needed for other node types
 
         results = self.perform_insertion_attack(node_type=node_type, ratios=ratios)
 
+        # Extract data for plotting
+        insertion_ratios = [result['ratio'] for result in results]
+        validation_results = [1 if result['validation_result'] else 0 for result in results]
+        times_taken = [result['time_taken'] for result in results]
+
+        # Plotting the results
+        fig, ax1 = plt.subplots(figsize=(10, 6))
+
+        # Plot the validation results (success or failure)
+        ax1.plot(insertion_ratios, validation_results, marker='o', color='b', label='Validation Result', linestyle='-', linewidth=2)
+        ax1.set_xlabel('Real-to-Fake Ratio')
+        ax1.set_ylabel('Validation Result (1: Success, 0: Failure)', color='b')
+        ax1.set_title('Effect of Insertion Attack on Watermark Validation')
+        ax1.tick_params(axis='y', labelcolor='b')
+
+        # Creating a second y-axis to plot time taken
+        ax2 = ax1.twinx()
+        ax2.plot(insertion_ratios, times_taken, marker='x', color='r', label='Time Taken', linestyle='--', linewidth=2)
+        ax2.set_ylabel('Time Taken (Seconds)', color='r')
+        ax2.tick_params(axis='y', labelcolor='r')
+
+        # Adding grid, labels, and legend
+        fig.tight_layout()
+        ax1.grid(True)
+        fig.legend(loc='upper left', bbox_to_anchor=(0.1, 0.9))
+        
+        plt.show()
+
         # Display results in a readable format
         print("\nInsertion Attack Results:")
         for result in results:
             print(f"Ratio: {result['ratio']}, Validation: {result['validation_result']}, Time: {result['time_taken']:.4f}s")
-
-    
     
     
     @staticmethod
@@ -344,14 +384,15 @@ class Driver:
     def execute(self):
         self.print_db_info()
         self.select_node_type()
-        # self.select_group_params()
+        self.select_group_params()
         self.select_fields()
-        # self.watermark()
-        # self.print_watermark_secret()
-        # self.generate_fake_data()
-        # print(f"Watermark Verified!" if self.validate() else "No Watermark Found!")
+        self.watermark()
+        self.print_watermark_secret()
+        self.generate_fake_data()
+        print(f"Watermark Verified!" if self.validate() else "No Watermark Found!")
         # self.verify_deletion()
-        self.verify_group_parameters()
+        # self.verify_group_parameters()
+        self.verify_insertion()
 
 if __name__ == "__main__":    
     driver = Driver()    

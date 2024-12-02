@@ -102,9 +102,16 @@ python3 driver.py
 
 ![Fig. 1: Embedding Performance](images%2Fdb_wm_embedding_time.png)
 *Fig. 1: Embedding Performance*
+
+
 ![Fig. 2: Pseudo Node Group Parameters](images%2Fdb_wm_group_params.png)
 *Fig. 2: Pseudo Node Group Parameters*
+
+
 ![Fig. 3: Simulating Deletion Attack](images%2Fdb_wm_deletion.png)
 *Fig. 3: Simulating Deletion Attack*
+
+
 ![Fig. 4: Simulating Insertion Attack](images%2Fdb_wm_insertion_attack.png)
 *Fig. 4: Simulating Insertion Attack*
+

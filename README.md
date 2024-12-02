@@ -100,18 +100,22 @@ python3 driver.py
 
 ## Evaluation
 
-![Fig. 1: Embedding Performance](images%2Fdb_wm_embedding_time.png)
-*Fig. 1: Embedding Performance*
+<div align="center">
+  <img src="images/db_wm_embedding_time.png" alt="Project Logo" width="400">
+  <p><em>Fig. 1: Embedding Performance</em></p>
+</div>
 
+<div align="center">
+  <img src="images/db_wm_group_params.png" alt="App Screenshot" width="400">
+  <p><em>Fig. 2: Pseudo Node Group Parameters</em></p>
+</div>
 
-![Fig. 2: Pseudo Node Group Parameters](images%2Fdb_wm_group_params.png)
-*Fig. 2: Pseudo Node Group Parameters*
+<div align="center">
+  <img src="images/db_wm_deletion.png" alt="Project Logo" width="400">
+  <p><em>Fig. 3: Simulating Deletion Attack</em></p>
+</div>
 
-
-![Fig. 3: Simulating Deletion Attack](images%2Fdb_wm_deletion.png)
-*Fig. 3: Simulating Deletion Attack*
-
-
-![Fig. 4: Simulating Insertion Attack](images%2Fdb_wm_insertion_attack.png)
-*Fig. 4: Simulating Insertion Attack*
-
+<div align="center">
+  <img src="images/db_wm_insertion_attack.png" alt="App Screenshot" width="400">
+  <p><em>Fig. 4: Simulating Insertion Attack</em></p>
+</div>

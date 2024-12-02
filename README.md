@@ -1,5 +1,9 @@
 # Graph Database Watermarking with Pseudo-Nodes
 
+![Python](https://img.shields.io/badge/python-3.12-blue)
+![Neo4j](https://img.shields.io/badge/Neo4j-Database-green)
+
+
 ## Overview
 
 This project implements a novel watermarking technique for graph databases, embedding ownership indicators within the graph structure using pseudo-nodes. The method ensures data integrity and provenance without compromising database performance. It is resilient to ownership attacks and provides an efficient way of verifying data authenticity through watermark extraction.
@@ -35,6 +39,11 @@ cd graph-watermarking
 ```bash
 pip install -r requirements.txt
 ```
+OR
+```bash
+python3.12 -m pipenv shell
+pip install -r requirements.txt
+```
 
 ## Set up Neo4j
 
@@ -68,47 +77,23 @@ pip install -r requirements.txt
 
      ```
 
+## Import Dataset:
+
+Please download the [UKCompanies dataset](https://neo4j.com/graphgists/35a813ba-ea10-4165-9065-84f8802cbae8/) and import in Neo4j by following the import instructions in the same link.
 
 ## Usage
-Watermark Insertion
-To insert a watermark into your graph database, run the following:
+
+One the dataset import has been verified, please run the following script in the virtual environment:
 
 ```bash
-python insert_watermark.py --graph <your_graph>
-```
-This command inserts ownership markers into the graph, embedding pseudo-nodes to securely watermark the data.
-
-## Watermark Extraction
-To extract and verify the watermark, use the following command:
-
-```bash
-python extract_watermark.py --graph <your_graph> --private_key <your_private_key>
-This process verifies the data's authenticity by matching the embedded pseudo-nodes using a private key.
+python3 driver.py
 ```
 
-## Attack Simulation
-To simulate guessing and deletion attacks on the graph and assess the resilience of the watermark, run:
-
-```bash
-python simulate_attacks.py --graph <your_graph>
-This will simulate various attack scenarios to verify the strength of the watermarking technique.
-```
-
-## Example Data:
-To test with example graph data, you can load the provided sample dataset:
-
-```bash
-python load_sample_graph.py
-```
-
-This script will populate the database with a sample graph for experimentation and testing.
-
-## Algorithm Description
-Pseudo-Node List: A list of pseudo-nodes is maintained to verify the original database.
-Watermark Insertion: A portion of the graph is embedded with ownership information using pseudo-nodes.
-Watermark Extraction: A fake database is generated, and using a private key, the system searches for matching pseudo-nodes. A match confirms the watermark and proves data authenticity.
-Contributions
-- Original Paper: Graph Database Watermarking with Pseudo-Nodes
-- Neo4j Documentation: Neo4j Docs
-- Cryptography Tools: PyCryptodome
-- Graph Database Resources: Graph Databases: Principles and Practice 
+1. The script will first print the database summary and information useful for schema analysis in this project.
+2. The script will first prompt you to select the node types. Please select type "all" to watermark all node types.
+3. Then you will be prompted to choose the minimum group size and maximum group size for pseudo node generation.
+4. Now, for all node types, you must select the required and optional fields for the pseudo nodes. Remember, the required fields must be numerical. Optional fields can be numerical.
+5. After this, the program will watermark the pseudo nodes and insert them back into the original data. The script will print the Watermark Secret: Private Key K and the watermarked node IDs along with the hashed secret.
+6. Then you will be asked to generate the number of total nodes in suspected fake data.
+7. You will prompted for real-to-fake data ratio between 0 and 1. Here, the real data has the watermarked nodes.
+8. After this, the watermark validation script will run to search for watermarks in the suspected data.

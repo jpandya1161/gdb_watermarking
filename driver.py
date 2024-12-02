@@ -3,6 +3,7 @@ import uuid
 import random
 import matplotlib.pyplot as plt
 import itertools
+import time
 from db import DB
 from embed import Embed
 from validate import Validate
@@ -71,13 +72,13 @@ class Driver:
 
     def select_fields(self):
         for node_type, nodes in self.data_dict.items():
-            # if node_type.lower() == "company":
-            print(f"For Node type: {node_type}, \n")
-            self.analyze_keys(nodes)
-            required_fields = input("Enter the required fields: ").split(" ")
-            optional_fields = input("Enter the optional fields: ").split(" ")
-            watermark_cover_field = input("Enter the watermark cover field: ")
-            self.fields_dict[node_type] = (required_fields, optional_fields, watermark_cover_field)
+            if node_type.lower() == "company":
+                print(f"For Node type: {node_type}, \n")
+                self.analyze_keys(nodes)
+                required_fields = input("Enter the required fields: ").split(" ")
+                optional_fields = input("Enter the optional fields: ").split(" ")
+                watermark_cover_field = input("Enter the watermark cover field: ")
+                self.fields_dict[node_type] = (required_fields, optional_fields, watermark_cover_field)
 
     def get_private_key(self):
         return self.private_key
@@ -184,6 +185,7 @@ class Driver:
         max_group_sizes = [25, 50, 75, 100, 125, 150, 175, 200]
         pseudonode_count = []
         combinations = list(itertools.product(min_group_sizes, max_group_sizes))
+        times = []
         x = []
         y = []
 
@@ -192,23 +194,108 @@ class Driver:
 
         for comb in combinations:
             min_group_length, max_group_length = comb
+            start = time.time()
             embed.embed(required_fields=self.fields_dict[node_type][0], optional_fields=self.fields_dict[node_type][1],
                         watermark_cover_field=self.fields_dict[node_type][2], min_group_length=min_group_length, 
                         max_group_length=max_group_length)
+            end = time.time()
+            times.append(end - start)
             pseudonode_count.append(len(embed.watermarked_nodes_dict.keys()))
             x.append(min_group_length)
             y.append(max_group_length)
 
-        fig = plt.figure()
-        ax =fig.add_subplot(111, projection="3d")
-        sc = ax.scatter(x, y, pseudonode_count, c=pseudonode_count, cmap="viridis")
-        ax.set_xlabel("Minimum Group Size")
-        ax.set_ylabel("Maximum Group Size")
-        ax.set_zlabel("Number of Pseudonodes")
-        plt.colorbar(sc)
+        # Uncomment for the plot
+        # fig = plt.figure()
+        # ax =fig.add_subplot(111, projection="3d")
+        # sc = ax.scatter(x, y, pseudonode_count, c=pseudonode_count, cmap="viridis")
+        # ax.set_xlabel("Minimum Group Size")
+        # ax.set_ylabel("Maximum Group Size")
+        # ax.set_zlabel("Number of Pseudonodes")
+        # plt.colorbar(sc)
+        sorted_xy = sorted(zip(pseudonode_count, times), key=lambda pair: pair[0])  # Sort by x
+        x_sorted, y_sorted = zip(*sorted_xy)
+
+        plt.figure(figsize=(10, 6))
+        plt.plot(x_sorted, y_sorted, marker='o', color='g')
+
+        # Adding labels and title
+        plt.title('Effect on Performance vs Pseudonode Count')
+        plt.xlabel('Pseudonode Count')
+        plt.ylabel('Time taken for Watermarking in seconds')
+        plt.grid(True)
         plt.show()
 
+        # ax2 = fig.add_subplot(122)
+        # ax2.plot(pseudonode_count, times, marker='o', color='g')
+        # ax2.set_xlabel('Pseudonode Count')
+        # ax2.set_ylabel('Time taken for Watermarking')
+        # ax2.set_title('Effect on Performance vs Pseudonode Count')
+        # ax2.legend()
 
+        # Show the plots
+        # plt.tight_layout()
+        plt.show()
+
+    def perform_insertion_attack(self, node_type, ratios):
+        """
+        Perform insertion attack with varying real-to-fake ratios and time validation.
+        """
+        results = []
+        for ratio in ratios:
+            # Generate fake data for the specified ratio
+            print(f"Testing insertion attack with ratio: {ratio}")
+            fake_data_company = FakeDataCompany()
+            self.fake_data[node_type] = fake_data_company.create_random_company_data_with_real(
+                num_fake_data=len(self.wm_data_dict[node_type]),
+                wm_data=self.wm_data_dict[node_type],
+                ratio=ratio
+            )
+
+            # Start the timer
+            start_time = time.time()
+
+            # Validate watermarks
+            validate = Validate(
+                data=self.fake_data[node_type], 
+                node_type=node_type, 
+                private_key=self.private_key
+            )
+            result = validate.validate_watermark(
+                wm_id_dict=self.wm_secret[node_type], 
+                watermark_cover_field=self.fields_dict[node_type][2]
+            )
+
+            # End the timer
+            elapsed_time = time.time() - start_time
+
+            # Store results
+            results.append({
+                "ratio": ratio,
+                "validation_result": result,
+                "time_taken": elapsed_time
+            })
+
+            print(f"Ratio: {ratio}, Validation Result: {'Success' if result else 'Failed'}, Time Taken: {elapsed_time:.4f} seconds")
+
+        return results
+
+    def verify_insertion(self):
+        """
+        Verify watermark robustness under insertion attacks with varying ratios.
+        """
+        ratios = [1, 0.9, 0.8, 0.7, 0.6, 0.5, 0.4, 0.3, 0.2, 0.1]
+        node_type = "Company"  # Adjust if needed for other node types
+
+        results = self.perform_insertion_attack(node_type=node_type, ratios=ratios)
+
+        # Display results in a readable format
+        print("\nInsertion Attack Results:")
+        for result in results:
+            print(f"Ratio: {result['ratio']}, Validation: {result['validation_result']}, Time: {result['time_taken']:.4f}s")
+
+    
+    
+    
     @staticmethod
     def analyze_keys(records):
         """Analyze keys present in all or only some of the records."""
@@ -257,13 +344,13 @@ class Driver:
     def execute(self):
         self.print_db_info()
         self.select_node_type()
-        self.select_group_params()
+        # self.select_group_params()
         self.select_fields()
-        self.watermark()
-        self.print_watermark_secret()
-        self.generate_fake_data()
-        print(f"Watermark Verified!" if self.validate() else "No Watermark Found!")
-        self.verify_deletion()
+        # self.watermark()
+        # self.print_watermark_secret()
+        # self.generate_fake_data()
+        # print(f"Watermark Verified!" if self.validate() else "No Watermark Found!")
+        # self.verify_deletion()
         self.verify_group_parameters()
 
 if __name__ == "__main__":    

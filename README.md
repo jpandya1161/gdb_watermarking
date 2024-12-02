@@ -97,3 +97,9 @@ python3 driver.py
 6. Then you will be asked to generate the number of total nodes in suspected fake data.
 7. You will prompted for real-to-fake data ratio between 0 and 1. Here, the real data has the watermarked nodes.
 8. After this, the watermark validation script will run to search for watermarks in the suspected data.
+
+## Evaluation
+![db_wm_deletion.png](images%2Fdb_wm_deletion.png)
+![db_wm_embedding_time.png](images%2Fdb_wm_embedding_time.png)
+![db_wm_group_params.png](images%2Fdb_wm_group_params.png)
+![db_wm_insertion_attack.png](images%2Fdb_wm_insertion_attack.png)

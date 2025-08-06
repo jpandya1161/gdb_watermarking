@@ -22,6 +22,22 @@ All team members collaborated on the **final report and documentation**.
 
 ---
 
+## 📚 Documentation
+
+For detailed insights and background, please refer to the following documents included in the `docs` folder:
+
+- 📄 [Final Project Report](docs/CS6360%20-%20Group%202%20-%20Project%20Final%20Report.pdf)  
+  Comprehensive report detailing our project methodology, implementation, testing, and results.
+
+- 📄 [Original Research Paper (Course Syllabus)](docs/UTD-CS-6360.001%20Database%20Design%20-%20SYLLABUS%20-%20Fall%202024(1).pdf)  
+  The original syllabus and foundational material for the course related to our project.
+
+---
+
+*You can click on these links to view the documents directly on GitHub or download them for offline reading.*
+
+---
+
 ## 📄 Original Project README
 
 *(Below is the original README for full project context.)*

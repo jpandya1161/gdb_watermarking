@@ -29,12 +29,12 @@ For detailed insights and background, please refer to the following documents in
 - 📄 [Final Project Report](docs/CS6360%20-%20Group%202%20-%20Project%20Final%20Report.pdf)  
   Comprehensive report detailing our project methodology, implementation, testing, and results.
 
-- 📄 [Original Research Paper (Course Syllabus)](docs/UTD-CS-6360.001%20Database%20Design%20-%20SYLLABUS%20-%20Fall%202024(1).pdf)  
-  The original syllabus and foundational material for the course related to our project.
+- 📄 [Original Research Paper: *Graph Database Watermarking Using Pseudo-Nodes*](docs/Graph%20Database%20Watermarking%20Using%20Pseudo-Nodes.pdf)  
+  The research paper that served as the foundation and inspiration for our project.
 
 ---
 
-*You can click on these links to view the documents directly on GitHub or download them for offline reading.*
+*Click on the links to view the documents directly on GitHub or download them for offline reading.*
 
 ---
 

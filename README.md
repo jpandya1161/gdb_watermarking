@@ -15,7 +15,7 @@ For full team contributions, see the **Team Contributions** section below.
 
 - **Kavimayil** – Literature review and analysis of prior methods  
 - **Abhinav** – EDA, system setup, and co-led testing & evaluation  
-- **Jay (me)** – Watermark extraction algorithm implementation and robustness testing  
+- **Jay (me)** – Watermark extraction algorithm implementation and performance evaluation for robustness testing  
 - **Saurav** – Core code development and watermark embedding algorithm  
 
 All team members collaborated on the **final report and documentation**.

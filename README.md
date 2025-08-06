@@ -32,9 +32,7 @@ For detailed insights and background, please refer to the following documents in
 - 📄 [Original Research Paper: *Graph Database Watermarking Using Pseudo-Nodes*](docs/Graph%20Database%20Watermarking%20Using%20Pseudo-Nodes.pdf)  
   The research paper that served as the foundation and inspiration for our project.
 
----
-
-*Click on the links to view the documents directly on GitHub or download them for offline reading.*
+*(Click on the links to view the documents directly on GitHub or download them for offline reading.)*
 
 ---
 

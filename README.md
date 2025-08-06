@@ -1,3 +1,33 @@
+# Graph Database Watermarking (Forked)
+
+> **Note:** This is a **fork** of our collaborative project to showcase my contributions.  
+> Original repository: [Original Repo Link](https://github.com/sauravdosi/gdb_watermarking.git)
+
+I am an **original contributor** to this project, and my key contributions include:  
+- 🔹 Implementing the **watermark extraction algorithm**  
+- 🔹 Co-leading **testing and evaluation** to ensure algorithm robustness  
+
+For full team contributions, see the **Team Contributions** section below.
+
+---
+
+## 👥 Team Contributions
+
+- **Kavimayil** – Literature review and analysis of prior methods  
+- **Abhinav** – EDA, system setup, and co-led testing & evaluation  
+- **Jay (me)** – Watermark extraction algorithm implementation and robustness testing  
+- **Saurav** – Core code development and watermark embedding algorithm  
+
+All team members collaborated on the **final report and documentation**.
+
+---
+
+## 📄 Original Project README
+
+*(Below is the original README for full project context.)*
+
+---
+
 # Graph Database Watermarking with Pseudo-Nodes
 
 ![Python](https://img.shields.io/badge/python-3.12-blue)
